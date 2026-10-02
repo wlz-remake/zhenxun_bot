@@ -6,7 +6,7 @@ import pytz
 
 from zhenxun.configs.config import Config
 from zhenxun.models.chat_history import ChatHistory
-from zhenxun.models.group_console import GroupConsole
+from zhenxun.models.group_console import GroupConsole, convert_module_format
 from zhenxun.models.task_info import TaskInfo
 from zhenxun.services.log import logger
 from zhenxun.services.message_load import should_pause_tasks
@@ -55,8 +55,7 @@ async def _():
                             _group, _ = await GroupConsole.get_or_create_root_group(
                                 group.group_id
                             )
-                            modules = [f"<{module}" for module in modules]
-                            _group.block_task = ",".join(modules) + ","  # type: ignore
+                            _group.block_task = convert_module_format(modules)
                             update_list.append(_group)
                             logger.info(
                                 "群组两日内未发送任何消息，关闭该群全部被动",
