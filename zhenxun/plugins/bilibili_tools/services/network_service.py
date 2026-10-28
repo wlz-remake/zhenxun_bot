@@ -104,24 +104,23 @@ async def extract_dynamic_images(dynamic_id: str) -> list[str]:
         if not item:
             return dynamic_images
 
-        if "modules" in item:
-            modules = item["modules"]
-            if "module_dynamic" in modules:
-                module_dynamic = modules["module_dynamic"]
-                if "major" in module_dynamic:
-                    major = module_dynamic["major"]
-                    if "opus" in major:
-                        opus = major["opus"]
-                        if "pics" in opus:
-                            for pic in opus["pics"]:
-                                if "url" in pic:
-                                    dynamic_images.append(pic["url"])
-                    elif "draw" in major:
-                        draw = major["draw"]
-                        if "items" in draw:
-                            for draw_item in draw["items"]:
-                                if "src" in draw_item:
-                                    dynamic_images.append(draw_item["src"])
+        modules = item.get("modules") or {}
+        module_dynamic = modules.get("module_dynamic") or {}
+        major = module_dynamic.get("major") or {}
+
+        opus = major.get("opus")
+        if isinstance(opus, dict):
+            for pic in opus.get("pics") or []:
+                url = pic.get("url") if isinstance(pic, dict) else None
+                if url:
+                    dynamic_images.append(url)
+
+        draw = major.get("draw")
+        if isinstance(draw, dict):
+            for draw_item in draw.get("items") or []:
+                src = draw_item.get("src") if isinstance(draw_item, dict) else None
+                if src:
+                    dynamic_images.append(src)
 
         logger.debug(f"从动态 {dynamic_id} 中提取到 {len(dynamic_images)} 张图片")
 
